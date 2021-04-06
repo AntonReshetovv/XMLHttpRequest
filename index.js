@@ -1,24 +1,29 @@
 const requestURL = 'https://jsonplaceholder.typicode.com/users'
 
-const xhr = new XMLHttpRequest()
+function sendRequest(method, url) {
+    return new Promise((resolve, reject) => {
+        const xhr = new XMLHttpRequest()
 
-xhr.open('GET', requestURL)
+        xhr.open(method, url)
+        xhr.responseType = 'json' // распарсил ответ с сервера
 
-xhr.responseType = 'json' // распарсил ответ с сервера
+        // при помощи xhr.onload можно обработать данные, которые приходят с сервера
+        xhr.onload = () => {
+            if (xhr.status >= 400) {
+                reject(xhr.response)  // Добавил проверку, чтобы обрабатывать потенциальные ошибки
+            } else {
+                resolve(xhr.response)
+            }
+        }
 
-// при помощи xhr.onload можно обработать данные, которые приходят с сервера
-xhr.onload = () => {
-    if(xhr.status >= 400){
-        console.error(xhr.response)  // Добавил проверку, чтобы обрабатывать потенциальные ошибки
-    }else {
-        console.log(xhr.response)
-    }
+        xhr.onerror = () => { // происходит, только когда запрос совсем не получилось выполнить
+            reject(xhr.response)
+        }
+        xhr.send()
+    })
 }
 
-xhr.onerror = () => { // происходит, только когда запрос совсем не получилось выполнить
-    console.log(xhr.response)
-}
-    
-
-xhr.send()
+sendRequest('GET', requestURL)
+    .then(data => console.log(data))
+    .catch(error => console.log(error))
 
